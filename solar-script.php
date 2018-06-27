@@ -2,59 +2,7 @@
 
 class Sun
 {
-    /**
-     * @var UnitConverter
-     */
-    private $unitConverter;
-
-    /**
-     * @var SkyObserver
-     */
-    private $skyObserver;
-
-    /**
-     * Sun constructor.
-     * @param UnitConverter $unitConverter
-     * @param SkyObserver $skyObserver
-     */
-    public function __construct(
-        UnitConverter $unitConverter,
-        SkyObserver $skyObserver
-    )
-    {
-        $this->unitConverter = $unitConverter;
-        $this->skyObserver = $skyObserver;
-    }
-
-    /**
-     * @return float|int
-     */
-    public function getSunriseTime()
-    {
-        $day = $this->skyObserver->getDay();
-
-        $declination = $this->unitConverter->getRadian($this->getDeclination($day));
-
-        $latitude = $this->unitConverter->getRadian($this->skyObserver->getLatitude());
-
-        $cos = tan($latitude) * tan($declination);
-
-        $hourDegree = $this->unitConverter->getDegree(acos($cos));
-
-        $time = $hourDegree * (1 / 15);
-
-        return $time;
-    }
-
-    /**
-     * @return float|int
-     */
-    public function getSunsetTime()
-    {
-        $sunsetTime = $this->getSunriseTime();
-
-        return 12 - $sunsetTime;
-    }
+    use UnitConverter;
 
     /**
      * Declination is calculated using Cooper formula
@@ -68,9 +16,50 @@ class Sun
 
         // turn degree in radian because php sin() take radian as argument
 
-        $declination = 23.45 * sin($this->unitConverter->getRadian($orbitDegree));
+        $declination = 23.45 * sin($this->getRadian($orbitDegree));
 
         return $declination;
+    }
+}
+
+class SkyEvent
+{
+    use UnitConverter;
+
+    private $sun;
+
+    private $skyObserver;
+
+    public function __construct
+    (
+        Sun $sun,
+        SkyObserver $skyObserver
+    )
+    {
+        $this->sun = $sun;
+        $this->skyObserver = $skyObserver;
+    }
+
+    public function getSunriseTime()
+    {
+        $day = $this->skyObserver->getDay();
+
+        $declination = $this->getRadian($this->sun->getDeclination($day));
+
+        $latitude = $this->getRadian($this->skyObserver->getLatitude());
+
+        $cos = tan($latitude) * tan($declination);
+
+        $hourDegree = $this->getDegree(acos($cos));
+
+        $time = $hourDegree * (1 / 15);
+
+        return $time;
+    }
+
+    public function getSunsetTime()
+    {
+        return 12 - $this->getSunriseTime();
     }
 }
 
@@ -113,7 +102,7 @@ class SkyObserver
     }
 }
 
-class UnitConverter
+trait UnitConverter
 {
     /**
      * @param $degree
@@ -139,10 +128,13 @@ class UnitConverter
 }
 
 $skyObserver = new SkyObserver();
-$skyObserver->setDay(177);
+$skyObserver->setDay(19);
 $skyObserver->setLatitude(50);
 
-$sun = new Sun(new UnitConverter(), $skyObserver);
+$sun = new Sun();
 
-echo 'Sunrise time: ' . $sun->getSunriseTime() . PHP_EOL;
-echo 'Sunset time: ' . $sun->getSunsetTime() . PHP_EOL;
+$skyEvent = new SkyEvent($sun, $skyObserver);
+
+echo 'Result shown for GMT+2 time zone' . PHP_EOL;
+echo 'Sunrise time: ' . $skyEvent->getSunriseTime() . PHP_EOL;
+echo 'Sunset time: ' . $skyEvent->getSunsetTime() . PHP_EOL;
