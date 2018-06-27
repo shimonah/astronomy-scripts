@@ -135,6 +135,5 @@ $sun = new Sun();
 
 $skyEvent = new SkyEvent($sun, $skyObserver);
 
-echo 'Result shown for GMT+2 time zone' . PHP_EOL;
 echo 'Sunrise time: ' . $skyEvent->getSunriseTime() . PHP_EOL;
 echo 'Sunset time: ' . $skyEvent->getSunsetTime() . PHP_EOL;
