@@ -127,13 +127,34 @@ trait UnitConverter
     }
 }
 
-$skyObserver = new SkyObserver();
-$skyObserver->setDay(19);
-$skyObserver->setLatitude(50);
+echo 'Enter your latitude: ';
 
-$sun = new Sun();
+$input = fopen ("php://stdin","r");
+$latitude = trim(fgets($input));
 
-$skyEvent = new SkyEvent($sun, $skyObserver);
+echo 'Enter day number (ex. 1 january is "1", 17 march is "77"): ';
 
-echo 'Sunrise time: ' . $skyEvent->getSunriseTime() . PHP_EOL;
-echo 'Sunset time: ' . $skyEvent->getSunsetTime() . PHP_EOL;
+$input = fopen ("php://stdin","r");
+$day = trim(fgets($input));
+
+echo 'You enter day - ' . $day . PHP_EOL;
+echo 'You enter latitude - ' . $latitude . PHP_EOL;
+
+echo 'This is correct data?(y/n):';
+
+$input = fopen ("php://stdin","r");
+$answer = trim(fgets($input));
+
+if($answer == 'y')
+{
+    $skyObserver = new SkyObserver();
+    $skyObserver->setDay($day);
+    $skyObserver->setLatitude($latitude);
+
+    $sun = new Sun();
+
+    $skyEvent = new SkyEvent($sun, $skyObserver);
+
+    echo 'Sunrise time: ' . $skyEvent->getSunriseTime() . PHP_EOL;
+    echo 'Sunset time: ' . $skyEvent->getSunsetTime() . PHP_EOL;
+}
